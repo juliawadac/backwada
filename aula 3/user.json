@@ -3,5 +3,14 @@
         "id": 1,
         "nome": "João Fulano",
         "email": "jogaofulano@gmail.com"
+    },
+    {
+        "id": 2,
+        "nome": "Julia Wada",
+        "email": "juliawadac@gmail.com",
+        "senha": "$2b$10$5/kkPHcOdE2ZchSm2HltL.feKt3SKK4.7V12057EPqp.64sz99UIe",
+        "endereco": "luvercy pereira de souza 307",
+        "cpf": "45181235816",
+        "telefone": "981199818"
     }
 ]

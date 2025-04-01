@@ -1,64 +1,68 @@
-
-const express = require ('express');
+const express = require('express');
 const userService = require ('./userService');
 
+const app = express(); //nome qualquer para express
+app.use(express.json()); //vou habilitar json no express
 
-const app = express (); // nome qualquer para express
-app.use (express.json()); //habilitar json no express
+//rota para criar usuario
+ 
+// Rota para criar um novo usuário
+app.post("/user", async (req, res) => {
+    try{
+    const { nome, email, senha, endereco, cpf, telefone } = req.body;
+    
 
-//rota parar criar users 
-
-app.post ("/users", (req,res) => {
-    const {nome,email} = req.body;
-    if (!nome || !email) {
-        return res.status(400).json ({error:"nome e email são obrigatórios!"})
+    // Verifica se todos os campos obrigatórios estão presentes
+    if (!nome || !email || !senha || !endereco || !cpf || !telefone) {
+        return res.status(400).json({ erro: "Todos os campos são obrigatórios (nome, email, senha, endereco, cpf, telefone)" });
     }
 
-    const user = userService.adduser(nome, email);
+    const user = await userService.addUser(nome, email, senha, endereco, cpf, telefone);  // Adiciona o usuário com os novos dados
 
-    res.status (200).json({user});
 
-})
-
-//rota para listar todos os usuarios 
-
-app.get ("/users", (req,res)=> {
-    res.json (userService.getusers());
+    res.status(200).json({ user });  // Retorna o usuário criado
+}catch (erro){
+    console.log (erro);
+    res.status (400).json({error: erro.message});
+}
 });
 
-const port = 3000;
-app.listen (port,(res, req)=> {
-    console.log ("servidor rodando na porta:", port);
+app.get("/user", (req, res) => {
+    res.json(userService.getUsers())
 })
-const express = require ('express');
-const userservice = require ('./userService');
 
-
-const app = express (); // nome qualquer para express
-app.use (express.json); //habilitar json no express
-
-//rota parar criar users 
-
-app.post ("/users", (req,res) => {
-    const {nome,email} = req.body;
-    if (!nome || !email) {
-        return res.status(400).json ({error:"nome e email são obrigatórios!"})
+// rota para excluir um usuário pelo ID
+app.delete("/users/:id", (req, res) => { 
+    const id = parseInt(req.params.id); 
+    //converte o ID para número 
+    try {
+        const resultado = userService.deleteUser(id);
+        // tenta excluir o usuário 
+        res.status(200).json(resultado);
+        // retorna a mensagem de sucesso 
+    } catch (erro) {
+        res.status(404).json({ error: erro.message });
+        //retorna a mensagem de erro
     }
-
-    const user = await   userservise.adduser (nome, email);
-
-    res.status (200).json({user});
-
-})
-
-//rota para listar todos os usuarios 
-
-app.get ("/users", (req,res)=> {
-    res.json (userservice.getusers ());
 });
 
-const port = 3000;
-app.listen (port,()=> {
-    console.log ("servidor rodando na porta:", port);
+// Rota para atualizar um usuário pelo ID
+app.put("/users/:id", (req, res) => {
+    const id = parseInt(req.params.id); // Converte o ID para número
+    const newData = req.body; // Dados novos do usuário
 
-}) 
+    try {
+        const updatedUser = userService.updateUser(id, newData);
+        res.status(200).json(updatedUser); // Retorna o usuário atualizado
+    } catch (erro) {
+        res.status(404).json({ error: erro.message }); // Retorna a mensagem de erro
+    }
+});
+
+
+
+
+const port = 3000;
+app.listen(port,() => {
+    console.log("Servidor rodando na porta", port)
+})

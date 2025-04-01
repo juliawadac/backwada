@@ -1,27 +1,15 @@
 
-class User {
-    constructor (id, nome, email, senha, endereco, telefone, cpf) {
-        this.id = id;
-        this.nome = nome;
-        this.email = email;
-        this.senha= senha;
-        this.endereco= endereco;
-        this.telefone= telefone;
-        this.cpf= cpf;
-   
-    }
-
-}
-
-module.exports = User;
-
-class user {
-    constructor (id, nome, email) {
-        this.id = id;
-        this.nome = nome;
-        this.email = email;
+class User{
+    constructor(id, nome, email, senha, endereco, cpf, telefone){
+        this.id = id;//id do usuário
+        this.nome = nome;//nome do usuário
+        this.email = email;//email do usuário
+        this.senha = senha;  // senha do usuário
+        this.endereco = endereco;  // endereço do usuário
+        this.cpf = cpf;      // cpf do usuário
+        this.telefone = telefone;  // telefone do usuário
     }
 }
 
-module.exports = user;
+module.exports = User; //exportar o modulo
 
