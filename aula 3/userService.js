@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const { error } = require("console");
+const mysql = require("./mysql");
 
 
 class userService {
@@ -47,22 +48,28 @@ class userService {
     async addUser(nome, email, senha, endereco, cpf, telefone) {
         try {
             const cpfexistente = this.users.some(user => user.cpf === cpf);
-            if (cpfexistente) { 
-                throw new Error ('CPF já cadastrado');
+            if (cpfexistente) {
+                throw new Error('CPF já cadastrado');
             }
-            if(cpf !== user.cpf) {
-                const cpfexistente = this.users.some (u => u.id !== id
+            if (cpf !== user.cpf) {
+                const cpfexistente = this.users.some(u => u.id !== id
                     && u.cpf === cpf);
-                    if(cpfexistente) {
-                        throw new Error ('CPF já cadastrado')
-                    }
-            }     
+                if (cpfexistente) {
+                    throw new Error('CPF já cadastrado')
+                }
+            }
             const senhaCripto = await bcrypt.hash(senha, 10);
-            const user = new User(this.nextId++, nome, email, senhaCripto, endereco, cpf, telefone);
-            console.log(user)
-            this.users.push(user);
-            this.saveUsers();
-            return user;
+
+            const resultados = await mysql.execute(
+                `insert into usuarios (nome,email,endereco,cpf,senha,telefone)
+                 values ( ?, ?, ?, ?, ?, ?)`
+                 [nome,email,senhaCripto,endereco,telefone,cpf]
+
+            );
+
+            return resultados;
+
+
         } catch (erro) {
             console.log("Erro ao add id", erro);
             throw erro;
@@ -77,32 +84,32 @@ class userService {
         }
     }
 
-    deleteUser(id){
-        try{
+    deleteUser(id) {
+        try {
             this.users = this.users.filter(user => user.id !== id);
             this.saveUsers();
 
-        }catch{
+        } catch {
             console.log('erro ao deletar usuario', erro);
         }
     }
 
-    updateUser(id, newData) { 
+    updateUser(id, newData) {
         try {
             const userIndex = this.users.findIndex(user => user.id === id);
-            
+
             if (userIndex === -1) throw new Error("Usuário não encontrado");
-    
+
             this.users[userIndex] = { ...this.users[userIndex], ...newData };
             this.saveUsers();
-    
+
             return this.users[userIndex];
         } catch (erro) {
             console.log("Erro ao atualizar usuário:", erro);
             throw erro;
         }
     }
-    
+
 
 }
 

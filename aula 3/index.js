@@ -20,7 +20,7 @@ app.post("/user", async (req, res) => {
     const user = await userService.addUser(nome, email, senha, endereco, cpf, telefone);  // Adiciona o usuário com os novos dados
 
 
-    res.status(200).json({ user });  // Retorna o usuário criado
+    res.status(200).json({ mensagem: "usuario cadastrado com sucesso!" });  // Retorna o usuário criado
 }catch (erro){
     console.log (erro);
     res.status (400).json({error: erro.message});
