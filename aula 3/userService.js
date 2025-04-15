@@ -47,23 +47,13 @@ class userService {
 
     async addUser(nome, email, senha, endereco, cpf, telefone) {
         try {
-            const cpfexistente = this.users.some(user => user.cpf === cpf);
-            if (cpfexistente) {
-                throw new Error('CPF já cadastrado');
-            }
-            if (cpf !== user.cpf) {
-                const cpfexistente = this.users.some(u => u.id !== id
-                    && u.cpf === cpf);
-                if (cpfexistente) {
-                    throw new Error('CPF já cadastrado')
-                }
-            }
+
             const senhaCripto = await bcrypt.hash(senha, 10);
 
             const resultados = await mysql.execute(
                 `insert into usuarios (nome,email,endereco,cpf,senha,telefone)
-                 values ( ?, ?, ?, ?, ?, ?)`
-                 [nome,email,senhaCripto,endereco,telefone,cpf]
+                 values ( ?, ?, ?, ?, ?, ?)`,
+                 [nome,email,endereco,cpf,senhaCripto,telefone]
 
             );
 
@@ -94,16 +84,18 @@ class userService {
         }
     }
 
-    updateUser(id, newData) {
+    async updateUser(idusuarios, newData) {
         try {
-            const userIndex = this.users.findIndex(user => user.id === id);
+            const senhaCripto = await bcrypt.hash(senha, 10);
 
-            if (userIndex === -1) throw new Error("Usuário não encontrado");
+            const resultadosu = await mysql.execute(
+                `update usuarios
+                 set nome = ?, email ?, endereco ?, cpf ?, senha = ?, telefone = ?
+                 where idusuarios = ?;`,
+                 [nome,email,endereco,cpf,senhaCripto,telefone,idusuarios]
+            );
 
-            this.users[userIndex] = { ...this.users[userIndex], ...newData };
-            this.saveUsers();
-
-            return this.users[userIndex];
+            return resultadosu;
         } catch (erro) {
             console.log("Erro ao atualizar usuário:", erro);
             throw erro;
