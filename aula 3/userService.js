@@ -29,20 +29,32 @@ class userService {
         }
     }
 
-    getUsers() {
+    async getUser(id) { //função p buscar usuarios
         try {
-            return this.users;
+            const resultado = await mysql.execute(
+                'SELECT idusuario FROM usuarios WHERE id = ?',
+                [id]
+            );
+            return resultado;
         } catch (erro) {
             console.log("Erro ao buscar usuario", erro);
         }
     }
 
-    deleteUser(id) {
+    async deleteUser(id) {
         try {
-            this.users = this.users.filter(user => user.id !== id);
-            this.saveUsers();
+        const user = await this.getUser(id);
+        if (user.length == 0) {
+            console.log ('usuario não existe!');
+            return;
+        }
+        const resultado = await mysql.execute(
+            'DELETE FROM usuarios WHERE idusuarios = ?',
+            [id]
+        );
+        return resultado;
 
-        } catch {
+        } catch (erro) {
             console.log('erro ao deletar usuario', erro);
         }
     }
