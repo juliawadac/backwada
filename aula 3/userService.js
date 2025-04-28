@@ -8,62 +8,15 @@ const mysql = require("./mysql");
 
 class userService {
 
-    constructor() {
-        this.filePath = path.join(__dirname, 'user.json');
-        this.users = this.loadUsers(); //Array para armazenar user
-        this.nextId = this.getNextId(); //contador para grrar id
-    }
-
-    loadUsers() {
-        try { //tenta executar o bloco de codigo
-            if (fs.existsSync(this.filePath)) { //verifica se o arquivo existe
-                const data = fs.readFileSync(this.filePath); //le o arquivo
-                return JSON.parse(data); //transforma o json em objeto
-            }
-        } catch (erro) { //caso ocorra um erro
-            console.log('Erro ao carregar arquivo', erro);
-        }
-        return []; //retorna um array vazio
-    }
-
-    //definir o próximo id a ser utilizado
-    getNextId() { //função para buscar o próximo id 
-        try {
-            if (this.users.length === 0) return 1;
-            return Math.max(...this.users.map(user => user.id)) + 1;
-        } catch (erro) {
-            console.log("Erro ao buscar proximo id", erro);
-        }
-    }
-
-    saveUsers() { //função para salvar os usuários
-        try {
-            fs.writeFileSync(this.filePath, JSON.stringify(this.users));
-        } catch (erro) {
-            console.log("Erro ao salvar", erro);
-        }
-    }
-
-
     async addUser(nome, email, senha, endereco, cpf, telefone) {
         try {
-            const cpfexistente = this.users.some(user => user.cpf === cpf);
-            if (cpfexistente) {
-                throw new Error('CPF já cadastrado');
-            }
-            if (cpf !== user.cpf) {
-                const cpfexistente = this.users.some(u => u.id !== id
-                    && u.cpf === cpf);
-                if (cpfexistente) {
-                    throw new Error('CPF já cadastrado')
-                }
-            }
+
             const senhaCripto = await bcrypt.hash(senha, 10);
 
             const resultados = await mysql.execute(
                 `insert into usuarios (nome,email,endereco,cpf,senha,telefone)
-                 values ( ?, ?, ?, ?, ?, ?)`
-                 [nome,email,senhaCripto,endereco,telefone,cpf]
+                 values ( ?, ?, ?, ?, ?, ?)`,
+                 [nome,email,endereco,cpf,senhaCripto,telefone]
 
             );
 
@@ -76,34 +29,48 @@ class userService {
         }
     }
 
-    getUsers() {
+    async getUser(id) { //função p buscar usuarios
         try {
-            return this.users;
+            const resultado = await mysql.execute(
+                'SELECT idusuario FROM usuarios WHERE id = ?',
+                [id]
+            );
+            return resultado;
         } catch (erro) {
             console.log("Erro ao buscar usuario", erro);
         }
     }
 
-    deleteUser(id) {
+    async deleteUser(id) {
         try {
-            this.users = this.users.filter(user => user.id !== id);
-            this.saveUsers();
+        const user = await this.getUser(id);
+        if (user.length == 0) {
+            console.log ('usuario não existe!');
+            return;
+        }
+        const resultado = await mysql.execute(
+            'DELETE FROM usuarios WHERE idusuarios = ?',
+            [id]
+        );
+        return resultado;
 
-        } catch {
+        } catch (erro) {
             console.log('erro ao deletar usuario', erro);
         }
     }
 
-    updateUser(id, newData) {
+    async updateUser(idusuarios, newData) {
         try {
-            const userIndex = this.users.findIndex(user => user.id === id);
+            const senhaCripto = await bcrypt.hash(senha, 10);
 
-            if (userIndex === -1) throw new Error("Usuário não encontrado");
+            const resultadosu = await mysql.execute(
+                `update usuarios
+                 set nome = ?, email ?, endereco ?, cpf ?, senha = ?, telefone = ?
+                 where idusuarios = ?;`,
+                 [nome,email,endereco,cpf,senhaCripto,telefone,idusuarios]
+            );
 
-            this.users[userIndex] = { ...this.users[userIndex], ...newData };
-            this.saveUsers();
-
-            return this.users[userIndex];
+            return resultadosu;
         } catch (erro) {
             console.log("Erro ao atualizar usuário:", erro);
             throw erro;

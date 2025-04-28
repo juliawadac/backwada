@@ -27,7 +27,7 @@ app.post("/user", async (req, res) => {
 }
 });
 
-app.get("/user", (req, res) => {
+app.get("/user", (req,res) => {
     res.json(userService.getUsers())
 })
 
@@ -52,8 +52,8 @@ app.put("/users/:id", (req, res) => {
     const newData = req.body; // Dados novos do usuário
 
     try {
-        const updatedUser = userService.updateUser(id, newData);
-        res.status(200).json(updatedUser); // Retorna o usuário atualizado
+        const updatedUser = userService.updateUser(idusuario, newData);
+        res.status(200).json({mensagem: "usuario atualizado com sucesso!"}); // Retorna o usuário atualizado
     } catch (erro) {
         res.status(404).json({ error: erro.message }); // Retorna a mensagem de erro
     }
